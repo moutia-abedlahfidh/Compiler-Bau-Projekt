@@ -1,0 +1,37 @@
+package ast;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class CallNode extends Node {
+    public final String name;
+    public final List<Node> args;
+
+    public CallNode(String name, List<Node> args) { this.name = name; this.args = args; }
+
+    @Override
+    public double eval(Map<String, Double> env) {
+        FunctionNode f = FunctionRegistry.lookup(name);
+        if (f == null) throw new RuntimeException("Undefined function: " + name);
+        // evaluate args
+        List<Double> avals = new ArrayList<>();
+        for (Node a : args) avals.add(a.eval(env));
+        // bind params to a fresh env
+        Map<String, Double> local = new HashMap<>();
+        for (int i = 0; i < f.params.size(); i++) {
+            String p = f.params.get(i);
+            double v = i < avals.size() ? avals.get(i) : 0.0;
+            local.put(p, v);
+        }
+        try {
+            return f.body.eval(local);
+        } catch (ReturnException r) {
+            return r.value;
+        }
+    }
+
+    @Override
+    public String toString() { return "Call(" + name + ", " + args + ")"; }
+}
