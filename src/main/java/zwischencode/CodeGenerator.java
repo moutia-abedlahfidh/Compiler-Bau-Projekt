@@ -22,6 +22,7 @@ public class CodeGenerator {
     }
 
     private void gen(Node node) {
+        if (node == null) throw new RuntimeException("Unknown node type: null");
 
         if (node instanceof NumberNode n) {
             emit(InstructionType.LOAD_CONST, n.value);
@@ -67,6 +68,10 @@ public class CodeGenerator {
         }
 
         if (node instanceof WhileNode w) {
+            if (isEmptySequence(w.body)) {
+                System.err.println("CodeGen warning: empty while-body detected — skipping loop to avoid infinite loop");
+                return;
+            }
             int startIndex = instructions.size();
             gen(w.cond);
             emit(InstructionType.JUMP_IF_FALSE, null);
@@ -86,6 +91,10 @@ public class CodeGenerator {
             if (f.init != null) {
                 gen(f.init);
                 emit(InstructionType.POP);
+            }
+            if (isEmptySequence(f.body)) {
+                System.err.println("CodeGen warning: empty for-body detected — skipping loop to avoid infinite loop");
+                return;
             }
             int startIndex = instructions.size();
             // Bedingung (null => true)
@@ -172,5 +181,9 @@ public class CodeGenerator {
         }
 
         throw new RuntimeException("Unknown node type: " + node.getClass());
+    }
+
+    private boolean isEmptySequence(Node node) {
+        return (node instanceof SequenceNode s) && s.stmts.isEmpty();
     }
 }

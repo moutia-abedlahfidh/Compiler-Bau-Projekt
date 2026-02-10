@@ -33,6 +33,7 @@ public class TypeChecker {
     }
 
     private Type visit(Node node) {
+        if (node == null) throw new TypeError("Unknown node type: null", 0, 0);
         if (node instanceof NumberNode) return Type.NUMBER;
         if (node instanceof VarNode v) return visitVar(v);
         if (node instanceof AssignNode a) return visitAssign(a);

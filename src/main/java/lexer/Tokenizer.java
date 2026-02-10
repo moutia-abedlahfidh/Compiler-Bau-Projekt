@@ -105,11 +105,9 @@ public class Tokenizer {
                     while (true) {
                         if (peek() == '\0') throw new RuntimeException("Unterminated block comment");
                 if (peek() == '*' && (pos + 1) < input.length() && input.charAt(pos + 1) == '/') {
-                    int endLine = line;
-                    int endCol = col;
                     next(); next(); // '*/' konsumieren
-                            break;
-                        }
+                    break;
+                }
                         next();
                     }
                     continue;
@@ -123,41 +121,42 @@ public class Tokenizer {
                 if (peek() == '\n') next();
                 continue;
             }
+            int startPos = pos;
+            int startLine = line;
+            int startCol = col;
             char op = next();
-            int opPos = pos - 1;
             // Zwei-Zeichen-Operatoren behandeln: ==, !=, <=, >=
                 if (op == '=') {
-                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.EQ, "==", opPos, line, col - 1)); }
-                    else { tokens.add(new Token(TokenType.ASSIGN, "=", opPos, line, col - 1)); }
+                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.EQ, "==", startPos, startLine, startCol)); }
+                    else { tokens.add(new Token(TokenType.ASSIGN, "=", startPos, startLine, startCol)); }
                     continue;
                 }
                 if (op == '!') {
-                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.NEQ, "!=", opPos, line, col - 1)); continue; }
-                    throw new RuntimeException("Unexpected character: ! at " + opPos);
+                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.NEQ, "!=", startPos, startLine, startCol)); continue; }
+                    throw new RuntimeException("Unexpected character: ! at " + startPos);
                 }
                 if (op == '<') {
-                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.LE, "<=", opPos, line, col - 1)); }
-                    else { tokens.add(new Token(TokenType.LT, "<", opPos, line, col - 1)); }
+                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.LE, "<=", startPos, startLine, startCol)); }
+                    else { tokens.add(new Token(TokenType.LT, "<", startPos, startLine, startCol)); }
                     continue;
                 }
                 if (op == '>') {
-                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.GE, ">=", opPos, line, col - 1)); }
-                    else { tokens.add(new Token(TokenType.GT, ">", opPos, line, col - 1)); }
+                    if (peek() == '=') { next(); tokens.add(new Token(TokenType.GE, ">=", startPos, startLine, startCol)); }
+                    else { tokens.add(new Token(TokenType.GT, ">", startPos, startLine, startCol)); }
                     continue;
                 }
             switch (op) {
-                case '+': tokens.add(new Token(TokenType.PLUS, "+", opPos, line, col - 1)); break;
-                case '-': tokens.add(new Token(TokenType.MINUS, "-", opPos, line, col - 1)); break;
-                case '*': tokens.add(new Token(TokenType.STAR, "*", opPos, line, col - 1)); break;
-                case '/': tokens.add(new Token(TokenType.SLASH, "/", opPos, line, col - 1)); break;
-                case '(' : tokens.add(new Token(TokenType.LPAREN, "(", opPos, line, col - 1)); break;
-                case ')' : tokens.add(new Token(TokenType.RPAREN, ")", opPos, line, col - 1)); break;
-                case '{' : tokens.add(new Token(TokenType.LBRACE, "{", opPos, line, col - 1)); break;
-                case '}' : tokens.add(new Token(TokenType.RBRACE, "}", opPos, line, col - 1)); break;
-                case ';' : tokens.add(new Token(TokenType.SEMI, ";", opPos, line, col - 1)); break;
-                case ',' : tokens.add(new Token(TokenType.COMMA, ",", opPos, line, col - 1)); break;
-                default:
-                    throw new RuntimeException("Unexpected character: " + op + " at " + opPos);
+                case '+' -> tokens.add(new Token(TokenType.PLUS, "+", startPos, startLine, startCol));
+                case '-' -> tokens.add(new Token(TokenType.MINUS, "-", startPos, startLine, startCol));
+                case '*' -> tokens.add(new Token(TokenType.STAR, "*", startPos, startLine, startCol));
+                case '/' -> tokens.add(new Token(TokenType.SLASH, "/", startPos, startLine, startCol));
+                case '(' -> tokens.add(new Token(TokenType.LPAREN, "(", startPos, startLine, startCol));
+                case ')' -> tokens.add(new Token(TokenType.RPAREN, ")", startPos, startLine, startCol));
+                case '{' -> tokens.add(new Token(TokenType.LBRACE, "{", startPos, startLine, startCol));
+                case '}' -> tokens.add(new Token(TokenType.RBRACE, "}", startPos, startLine, startCol));
+                case ';' -> tokens.add(new Token(TokenType.SEMI, ";", startPos, startLine, startCol));
+                case ',' -> tokens.add(new Token(TokenType.COMMA, ",", startPos, startLine, startCol));
+                default -> throw new RuntimeException("Unexpected character: " + op + " at " + startPos);
             }
         }
         return tokens;

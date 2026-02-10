@@ -83,7 +83,13 @@ public class VM {
                 case ADD -> { stack.push(pop() + pop()); ip++; }
                 case SUB -> { double r = pop(); double l = pop(); stack.push(l - r); ip++; }
                 case MUL -> { stack.push(pop() * pop()); ip++; }
-                case DIV -> { double r = pop(); double l = pop(); stack.push(l / r); ip++; }
+                case DIV -> {
+                    double r = pop();
+                    double l = pop();
+                    if (r == 0.0) throw new ArithmeticException("Division by zero");
+                    stack.push(l / r);
+                    ip++;
+                }
 
                 case NEG -> { stack.push(-pop()); ip++; }
 
@@ -117,7 +123,7 @@ public class VM {
                 // Wenn FUNCTION_END während Funktionsausführung erreicht wird:
                 // implizites "return" mit letztem Ausdruck (falls vorhanden)
                 case FUNCTION_END -> {
-                    double rv = stack.isEmpty() ? 0.0 : pop();
+                    double rv = pop();
                     ip = doReturn(rv);
                 }
 
@@ -139,7 +145,8 @@ public class VM {
                     Map<String, Double> newLocals = new HashMap<>();
                     for (int i = 0; i < fi.params.size(); i++) {
                         String p = fi.params.get(i);
-                        double v = i < args.size() ? args.get(i) : 0.0;
+                        Double arg = i < args.size() ? args.get(i) : null;
+                        double v = arg != null ? arg : 0.0;
                         newLocals.put(p, v);
                     }
 
@@ -152,7 +159,7 @@ public class VM {
 
                 case RET -> {
                     // Rueckgabewert ist entweder Stack-Top oder 0.0 (wenn return; ohne expr)
-                    double rv = stack.isEmpty() ? 0.0 : pop();
+                    double rv = pop();
                     ip = doReturn(rv);
                 }
 
@@ -170,11 +177,12 @@ public class VM {
             }
         }
 
-        return stack.isEmpty() ? 0.0 : stack.pop();
+        return pop();
     }
 
     private double pop() {
-        return stack.isEmpty() ? 0.0 : stack.pop();
+        Double v = stack.poll();
+        return v != null ? v : 0.0;
     }
 
     private int doReturn(double rv) {
