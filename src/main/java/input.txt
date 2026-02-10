@@ -4,7 +4,7 @@ x = 5; x + 1
 
 # if true / false
 if (1 < 2) x = 5; else x = 6; x
-if (1 > 2) x = 5; else x = 6; x
+
 
 # while
 x = 0; while (x < 3) x = x + 1; x
@@ -20,6 +20,43 @@ function add(a, b) { return a + b } add(2, 3)
 
 # recursion factorial
 function fact(n) { if (n <= 1) return 1; return n * fact(n - 1) } fact(5)
+
+# comparisons starting with identifier
+x = 1; x < 2
+
+# parenthesized comparison
+(1 < 2)
+
+# comparison inside expression
+x = 1; (x < 2) + 1
+
+# function without explicit return
+function id(a) { a } id(5)
+
+function add(a, b) { return a + b }
+# operator precedence and associativity
+1 - 2 - 3
+1 + 2 * 3
+(1 + 2) * 3
+-(1 + 2)
+
+# division by zero
+1 / 0
+
+# undefined variable
+y + 1
+
+# empty input and comment-only lines
+
+// comment only line
+
+# empty block and if without else
+if (1) { }
+if (0) x = 1; x
+
+# for variants (missing parts)
+for (; 0; ) x = 1
+for (i = 0; ; i = i + 1) { if (i > 2) return i }
 
 # comments only
 // just a comment
