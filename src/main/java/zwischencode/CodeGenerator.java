@@ -72,6 +72,8 @@ public class CodeGenerator {
             emit(InstructionType.JUMP_IF_FALSE, null);
             int jifIdx = instructions.size() - 1;
             gen(w.body);
+            // Discard body value each iteration (statement context)
+            emit(InstructionType.POP);
             // jump back to condition
             emit(InstructionType.JUMP, startIndex);
             // patch jif to point after loop body
@@ -81,7 +83,10 @@ public class CodeGenerator {
 
         if (node instanceof ForNode f) {
             // init
-            if (f.init != null) gen(f.init);
+            if (f.init != null) {
+                gen(f.init);
+                emit(InstructionType.POP);
+            }
             int startIndex = instructions.size();
             // cond (if null => true)
             if (f.cond != null) gen(f.cond);
@@ -90,8 +95,13 @@ public class CodeGenerator {
             int jifIdx = instructions.size() - 1;
             // body
             gen(f.body);
+            // Discard body value each iteration (statement context)
+            emit(InstructionType.POP);
             // post
-            if (f.post != null) gen(f.post);
+            if (f.post != null) {
+                gen(f.post);
+                emit(InstructionType.POP);
+            }
             // jump back to startIndex
             emit(InstructionType.JUMP, startIndex);
             // patch jif
@@ -122,6 +132,8 @@ public class CodeGenerator {
         if (node instanceof AssignNode a) {
             gen(a.expr);
             emit(InstructionType.STORE_VAR, a.name);
+            // Assignment evaluates to its assigned value (match AST semantics)
+            emit(InstructionType.LOAD_VAR, a.name);
             return;
         }
 
@@ -151,8 +163,10 @@ public class CodeGenerator {
         }
 
         if (node instanceof SequenceNode s) {
-            for (Node stmt : s.stmts) {
+            for (int i = 0; i < s.stmts.size(); i++) {
+                Node stmt = s.stmts.get(i);
                 gen(stmt);
+                if (i < s.stmts.size() - 1) emit(InstructionType.POP);
             }
             return;
         }

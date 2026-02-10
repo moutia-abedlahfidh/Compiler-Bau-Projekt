@@ -5,17 +5,19 @@ import java.util.*;
 /**
  * Stack-basierte VM für den von CodeGenerator erzeugten Zwischencode.
  * - führt arithmetische Ops, Variablen, Sprünge, Vergleiche und Funktionen aus
- * - Funktionen haben ein eigenes lokales Environment (wie bei deinem AST.eval)
+ * - Funktionen haben ein eigenes lokales Environment (wie beim AST.eval)
  */
 public class VM {
 
     private static class Frame {
         final Map<String, Double> locals;
         final int returnIp;
+        final Deque<Double> stack;
 
-        Frame(Map<String, Double> locals, int returnIp) {
+        Frame(Map<String, Double> locals, int returnIp, Deque<Double> stack) {
             this.locals = locals;
             this.returnIp = returnIp;
+            this.stack = stack;
         }
     }
 
@@ -34,7 +36,7 @@ public class VM {
     }
 
     // Speichert Zwischenergebnisse von Berechnungen 
-    private final Deque<Double> stack = new ArrayDeque<>();
+    private Deque<Double> stack = new ArrayDeque<>();
     // Speichert Springadresse (returnIP) und Lokale Variablen des Aufrufers
     private final Deque<Frame> callStack = new ArrayDeque<>();
     // Enthält alle bekannten Funktionen
@@ -113,9 +115,10 @@ public class VM {
                 }
 
                 // Wenn FUNCTION_END während Funktionsausführung erreicht wird:
-                // implizites "return 0.0"
+                // implizites "return" mit letztem Ausdruck (falls vorhanden)
                 case FUNCTION_END -> {
-                    ip = doReturn(0.0);
+                    double rv = stack.isEmpty() ? 0.0 : pop();
+                    ip = doReturn(rv);
                 }
 
                 case CALL -> {
@@ -141,8 +144,9 @@ public class VM {
                     }
 
                     // Frame pushen + in Funktion springen
-                    callStack.push(new Frame(locals, ip + 1));
+                    callStack.push(new Frame(locals, ip + 1, stack));
                     locals = newLocals;
+                    stack = new ArrayDeque<>();
                     ip = fi.entryIp;
                 }
 
@@ -154,6 +158,11 @@ public class VM {
 
                 case PRINT -> {
                     System.out.println(pop());
+                    ip++;
+                }
+
+                case POP -> {
+                    if (!stack.isEmpty()) stack.pop();
                     ip++;
                 }
 
@@ -178,6 +187,7 @@ public class VM {
         // Das ist die Funktion, die diese Funktion aufgerufen hat
         locals = prev.locals; // Die lokalen Variablen der aufrufenden Funktion werden zurückgesetzt 
         // Die Variablen der aktuellen Funktion verschwinden
+        stack = prev.stack;
         stack.push(rv);
         return prev.returnIp;
     }

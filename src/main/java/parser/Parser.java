@@ -49,7 +49,7 @@ public class Parser {
             List<Node> stmts = new ArrayList<>();
             while (peek().type != TokenType.RBRACE && peek().type != TokenType.EOF) {
                 if (peek().type == TokenType.SEMI) { next(); continue; }
-                stmts.add(parseStart());
+                stmts.add(parseStatement());
                 while (peek().type == TokenType.SEMI) next();
             }
             eat(TokenType.RBRACE);
@@ -134,8 +134,7 @@ public class Parser {
         }
 
         if (peek().type == TokenType.IDENT) {
-            // lookahead: if IDENT is followed by LPAREN, treat as expression (function call)
-            Token identPeek = peek();
+            // Assignment: IDENT '=' expr
             Token second = (pos + 1) < tokens.size() ? tokens.get(pos + 1) : new Token(TokenType.EOF, "", pos + 1);
             if (second.type == TokenType.ASSIGN) {
                 Token ident = next();
@@ -143,14 +142,6 @@ public class Parser {
                 Node e = parseComparison();
                 return new AssignNode(ident.text, e);
             }
-            if (second.type == TokenType.LPAREN) {
-                // leave IDENT in stream and parse as expression so parseFactor can handle call
-                return parseComparison();
-            }
-            // otherwise normal identifier -> variable or expression
-            Token ident = next();
-            Node left = new VarNode(ident.text);
-            return parseExprPrime(left);
         }
         return parseComparison();
     }
@@ -240,7 +231,7 @@ public class Parser {
         }
         if (peek().type == TokenType.LPAREN) {
             eat(TokenType.LPAREN);
-            Node e = parseExpr();
+            Node e = parseComparison();
             eat(TokenType.RPAREN);
             return e;
         }

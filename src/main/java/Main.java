@@ -29,7 +29,8 @@ public class Main {
         examples.add("x = 10; y = x * 2; y + 5");
         examples.add("x = 7; x = x + 3; x * 2");
         examples.add("42/ / 6 + 1.5");*/
-        try (BufferedReader reader = new BufferedReader(new FileReader("C:/Users/MSI/Downloads/CB_02.12.25/SE1/src/main/java/input.txt"))) {
+        String inputPath = args.length > 0 ? args[0] : "src/main/java/input.txt";
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputPath))) {
         String line;
         while ((line = reader.readLine()) != null) {
         if (!line.trim().isEmpty()) {
@@ -56,7 +57,7 @@ public class Main {
 
                 if (ast instanceof SequenceNode s && s.stmts.isEmpty()) {
                     System.out.println("AST: Sequence[]");
-                    System.out.println("No statements to execute (input was empty or only comments).");
+                    System.out.println("AST Info: No statements to execute (input was empty or only comments).");
                 } else {
                     System.out.println("AST: " + ast);
 
@@ -72,9 +73,9 @@ public class Main {
                     // catch it and print its value instead of an error message.
                     try {
                         double result = ast.eval(env);
-                        System.out.println("Result: " + result);
+                        System.out.println("AST Result: " + result);
                     } catch (ReturnException re) {
-                        System.out.println("Result: " + re.value);
+                        System.out.println("AST Result: " + re.value);
                     }
                     try {
                         VM vm = new VM();
@@ -87,7 +88,7 @@ public class Main {
 
                 }
             } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
+                System.out.println("Parse Error: " + e.getMessage());
             }
             System.out.println();
         }

@@ -9,7 +9,8 @@ public enum InstructionType {
     MUL,          // *
     DIV,          // /
     NEG,          // for unary minus
-    PRINT         // Ausgabe
+    PRINT,        // Ausgabe
+    POP           // Stack-Top verwerfen (z.B. Ausdruck-Statements)
     , JUMP_IF_FALSE
     , JUMP
     // comparison helpers 
