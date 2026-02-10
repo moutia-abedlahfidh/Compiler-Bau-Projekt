@@ -8,13 +8,13 @@ public enum InstructionType {
     SUB,          // -
     MUL,          // *
     DIV,          // /
-    NEG,          // for unary minus
+    NEG,          // fuer unaires Minus
     PRINT,        // Ausgabe
     POP           // Stack-Top verwerfen (z.B. Ausdruck-Statements)
     , JUMP_IF_FALSE
     , JUMP
-    // comparison helpers 
+    // Vergleichs-Operatoren
     , LT, GT, LE, GE, EQ, NEQ
-    // function / call helpers
+    // Funktions- und Aufruf-Operatoren
     , FUNCTION_DEF, FUNCTION_END, CALL, RET
 }

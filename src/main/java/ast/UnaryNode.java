@@ -1,8 +1,8 @@
 package ast;
 
-import lexer.Token;
-
 import java.util.Map;
+import lexer.Token;
+import lexer.TokenType;
 
 /**
  * Unärer Operator-Knoten (z. B. +x oder -x).
@@ -11,7 +11,15 @@ import java.util.Map;
 public class UnaryNode extends Node {
     private final Token op;
     public final Node expr;
-    public UnaryNode(Token op, Node expr) { this.op = op; this.expr = expr; }
+    public UnaryNode(Token op, Node expr) {
+        super(op.line, op.col);
+        this.op = op;
+        this.expr = expr;
+    }
+
+    public boolean isMinus() {
+        return op.type == TokenType.MINUS;
+    }
 
     @Override
     public double eval(Map<String, Double> env) {

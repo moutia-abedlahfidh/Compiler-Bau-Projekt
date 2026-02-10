@@ -4,15 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a function declaration: `function name(params...) body`.
- * Evaluating a FunctionNode registers it in the global registry.
+ * Repräsentiert eine Funktionsdeklaration: `function name(params...) body`.
+ * Beim Auswerten wird die Funktion im globalen Registry registriert.
  */
 public class FunctionNode extends Node {
     public final String name;
     public final List<String> params;
     public final Node body;
 
-    public FunctionNode(String name, List<String> params, Node body) {
+    public FunctionNode(String name, List<String> params, Node body, int line, int col) {
+        super(line, col);
         this.name = name; this.params = params; this.body = body;
     }
 

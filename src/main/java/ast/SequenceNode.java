@@ -9,7 +9,10 @@ import java.util.Map;
  */
 public class SequenceNode extends Node {
     public final List<Node> stmts;
-    public SequenceNode(List<Node> stmts) { this.stmts = stmts; }
+    public SequenceNode(List<Node> stmts, int line, int col) {
+        super(line, col);
+        this.stmts = stmts;
+    }
     @Override
     public double eval(Map<String, Double> env) {
         double last = 0;

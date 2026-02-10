@@ -7,7 +7,10 @@ import java.util.Map;
  */
 public class NumberNode extends Node {
     public final double value;
-    public NumberNode(double value) { this.value = value; }
+    public NumberNode(double value, int line, int col) {
+        super(line, col);
+        this.value = value;
+    }
     @Override
     public double eval(Map<String, Double> env) { return value; }
     @Override

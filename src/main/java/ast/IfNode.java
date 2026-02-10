@@ -10,7 +10,8 @@ public class IfNode extends Node {
     public final Node thenBranch;
     public final Node elseBranch; // optional
 
-    public IfNode(Node cond, Node thenBranch, Node elseBranch) {
+    public IfNode(Node cond, Node thenBranch, Node elseBranch, int line, int col) {
+        super(line, col);
         this.cond = cond;
         this.thenBranch = thenBranch;
         this.elseBranch = elseBranch;

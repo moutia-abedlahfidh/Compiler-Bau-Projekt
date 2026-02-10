@@ -10,7 +10,7 @@ if (1 < 2) x = 5; else x = 6; x
 x = 0; while (x < 3) x = x + 1; x
 
 # for
-x = 0; for (i = 0; i < 3; i = i + 1) x = x + i; return x
+x = 0; for (i = 0; i < 3; i = i + 1) x = x + i; x
 
 # nested for
 x = 0; for (i = 0; i < 3; i = i + 1) { for (j = 0; j < 2; j = j + 1) { x = x + i + j } } x
@@ -32,13 +32,13 @@ x = 1; (x < 2) + 1
 
 # function without explicit return
 function id(a) { a } id(5)
-
 function add(a, b) { return a + b }
 # operator precedence and associativity
 1 - 2 - 3
 1 + 2 * 3
 (1 + 2) * 3
 -(1 + 2)
++3
 
 # division by zero
 1 / 0
@@ -58,13 +58,39 @@ if (0) x = 1; x
 for (; 0; ) x = 1
 for (i = 0; ; i = i + 1) { if (i > 2) return i }
 
+# type checker errors
+if (1) x = 1
+while (2) x = 1
+x = 1 < 2; x + 1
+function isSmall(a) { return a < 1 } isSmall(2) + 1
+
 # comments only
 // just a comment
+/* block comment example */
 
 # parse error (unbalanced brace)
 x = 0; while (x < 3) { x = x + 1
 
 # example with print
 a = 7; b = 3;
- c= a + b ; return c
+c= a + b ; c
+
+# comparisons eq/neq
+1 == 1
+1 != 2
+1 == 2
+
+# functions: zero-arg, return without expr, arity errors
+function zero() { return 7 } zero()
+function emptyReturn() { return; } emptyReturn()
+function one(a) { return a } one()
+function one2(a) { return a } one2(1, 2)
+missingFunc(1)
+
+# exponent numbers
+1e3 + 2
+3.5e-2 + 1
+
+# nested function calls
+function inc(a) { return a + 1 } inc(inc(1))
 

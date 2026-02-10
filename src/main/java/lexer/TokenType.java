@@ -12,7 +12,7 @@ public enum TokenType {
     LPAREN, RPAREN,
     LBRACE, RBRACE,
     ASSIGN, SEMI,
-    // comparisons
+    // Vergleiche
     EQ, NEQ, LT, GT, LE, GE,
     EOF
 }

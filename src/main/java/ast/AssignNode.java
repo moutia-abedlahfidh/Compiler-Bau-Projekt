@@ -9,7 +9,11 @@ import java.util.Map;
 public class AssignNode extends Node {
     public final String name;
     public final Node expr;
-    public AssignNode(String name, Node expr) { this.name = name; this.expr = expr; }
+    public AssignNode(String name, Node expr, int line, int col) {
+        super(line, col);
+        this.name = name;
+        this.expr = expr;
+    }
     @Override
     public double eval(Map<String, Double> env) {
         double v = expr.eval(env);

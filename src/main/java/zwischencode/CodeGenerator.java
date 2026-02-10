@@ -35,32 +35,32 @@ public class CodeGenerator {
 
         if (node instanceof UnaryNode u) {
             gen(u.expr);
-            emit(InstructionType.NEG);
+            if (u.isMinus()) emit(InstructionType.NEG);
             return;
         }
 
         if (node instanceof IfNode i) {
-            // gen condition
+            // Bedingung erzeugen
             gen(i.cond);
-            // emit jump-if-false with placeholder
+            // JUMP_IF_FALSE mit Platzhalter emittieren
             emit(InstructionType.JUMP_IF_FALSE, null);
             int jifIndex = instructions.size() - 1;
 
-            // then branch
+            // Dann-Zweig
             gen(i.thenBranch);
 
             if (i.elseBranch != null) {
-                // emit unconditional jump to end
+                // bedingungslosen Sprung zum Ende emittieren
                 emit(InstructionType.JUMP, null);
                 int jEndIndex = instructions.size() - 1;
-                // patch jump-if-false to point to start of else
+                // JUMP_IF_FALSE auf Beginn des else-Zweigs patchen
                 instructions.get(jifIndex).operand = instructions.size();
-                // else branch
+                // else-Zweig
                 gen(i.elseBranch);
-                // patch end jump to point after else
+                // Endsprung auf Position nach else-Zweig patchen
                 instructions.get(jEndIndex).operand = instructions.size();
             } else {
-                // no else: patch jump-if-false to point after then-branch
+                // kein else: JUMP_IF_FALSE auf Position nach Dann-Zweig patchen
                 instructions.get(jifIndex).operand = instructions.size();
             }
             return;
@@ -72,39 +72,39 @@ public class CodeGenerator {
             emit(InstructionType.JUMP_IF_FALSE, null);
             int jifIdx = instructions.size() - 1;
             gen(w.body);
-            // Discard body value each iteration (statement context)
+            // Rumpf-Wert pro Iteration verwerfen (Statement-Kontext)
             emit(InstructionType.POP);
-            // jump back to condition
+            // zur Bedingung zurueckspringen
             emit(InstructionType.JUMP, startIndex);
-            // patch jif to point after loop body
+            // JIF auf Position nach dem Schleifenrumpf patchen
             instructions.get(jifIdx).operand = instructions.size();
             return;
         }
 
         if (node instanceof ForNode f) {
-            // init
+            // Initialisierung
             if (f.init != null) {
                 gen(f.init);
                 emit(InstructionType.POP);
             }
             int startIndex = instructions.size();
-            // cond (if null => true)
+            // Bedingung (null => true)
             if (f.cond != null) gen(f.cond);
             else emit(InstructionType.LOAD_CONST, 1.0);
             emit(InstructionType.JUMP_IF_FALSE, null);
             int jifIdx = instructions.size() - 1;
-            // body
+            // Rumpf
             gen(f.body);
-            // Discard body value each iteration (statement context)
+            // Rumpf-Wert pro Iteration verwerfen (Statement-Kontext)
             emit(InstructionType.POP);
-            // post
+            // Post-Ausdruck
             if (f.post != null) {
                 gen(f.post);
                 emit(InstructionType.POP);
             }
-            // jump back to startIndex
+            // zum Startindex zurueckspringen
             emit(InstructionType.JUMP, startIndex);
-            // patch jif
+            // JIF patchen
             instructions.get(jifIdx).operand = instructions.size();
             return;
         }
@@ -132,13 +132,13 @@ public class CodeGenerator {
         if (node instanceof AssignNode a) {
             gen(a.expr);
             emit(InstructionType.STORE_VAR, a.name);
-            // Assignment evaluates to its assigned value (match AST semantics)
+            // Zuweisung liefert den zugewiesenen Wert (AST-Semantik)
             emit(InstructionType.LOAD_VAR, a.name);
             return;
         }
 
         if (node instanceof FunctionNode fn) {
-        // FUNCTION_DEF speichert Namen + Parameternamen (nicht nur arity),
+        // FUNCTION_DEF speichert Namen + Parameternamen (nicht nur Parameteranzahl),
         // damit die VM Argumente korrekt binden kann.
             emit(InstructionType.FUNCTION_DEF, fn.name + ":" + String.join(",", fn.params));
         // Funktionskörper emittieren (VM wird Definitionen im Main-Flow überspringen)
@@ -149,9 +149,9 @@ public class CodeGenerator {
 
 
         if (node instanceof CallNode call) {
-            // evaluate arguments
+            // Argumente auswerten
             for (Node a : call.args) gen(a);
-            // emit call with name and arg count
+            // CALL mit Name und Argumentanzahl emittieren
             emit(InstructionType.CALL, call.name + ":" + call.args.size());
             return;
         }

@@ -35,17 +35,17 @@ public class Parser {
             stmts.add(parseStatement());
             while (peek().type == TokenType.SEMI) next();
         }
-        if (stmts.size() == 0) return new SequenceNode(new ArrayList<>());
+        if (stmts.size() == 0) return new SequenceNode(new ArrayList<>(), -1, -1);
         if (stmts.size() == 1) return stmts.get(0);
-        return new SequenceNode(stmts);
+        return new SequenceNode(stmts, -1, -1);
     }
 
     /**
-     * Parse a statement or a block. A block is `{ stmt* }` and returns a SequenceNode.
+     * Parst ein Statement oder einen Block. Ein Block ist `{ stmt* }` und liefert eine SequenceNode.
      */
     private Node parseStatement() {
         if (peek().type == TokenType.LBRACE) {
-            next(); // consume '{'
+            Token lb = next(); // '{' konsumieren
             List<Node> stmts = new ArrayList<>();
             while (peek().type != TokenType.RBRACE && peek().type != TokenType.EOF) {
                 if (peek().type == TokenType.SEMI) { next(); continue; }
@@ -53,29 +53,29 @@ public class Parser {
                 while (peek().type == TokenType.SEMI) next();
             }
             eat(TokenType.RBRACE);
-            if (stmts.size() == 0) return new SequenceNode(new ArrayList<>());
+            if (stmts.size() == 0) return new SequenceNode(new ArrayList<>(), lb.line, lb.col);
             if (stmts.size() == 1) return stmts.get(0);
-            return new SequenceNode(stmts);
+            return new SequenceNode(stmts, lb.line, lb.col);
         }
         return parseStart();
     }
 
     private Node parseStart() {
-        // keywords: IF, WHILE, FOR are now distinct token types
+        // Keywords: IF, WHILE, FOR sind eigene Token-Typen
         if (peek().type == TokenType.IF) {
-            next(); // consume 'if'
+            Token ifTok = next(); // 'if' konsumieren
             eat(TokenType.LPAREN);
             Node cond = parseComparison();
             eat(TokenType.RPAREN);
             Node thenBranch = parseStatement();
             Node elseBranch = null;
-            // skip optional semicolons between then-branch and else
+            // optionale Semikolons zwischen Dann-Zweig und else ueberspringen
             while (peek().type == TokenType.SEMI) next();
             if (peek().type == TokenType.ELSE) {
                 next();
                 elseBranch = parseStatement();
             }
-            return new IfNode(cond, thenBranch, elseBranch);
+            return new IfNode(cond, thenBranch, elseBranch, ifTok.line, ifTok.col);
         }
         if (peek().type == TokenType.WHILE) {
             Token whileTok = next();
@@ -83,11 +83,11 @@ public class Parser {
             Node cond = parseComparison();
             eat(TokenType.RPAREN);
             Node body = parseStatement();
-            // detect empty body which usually indicates a mistake (may cause infinite loop)
+            // leeren Rumpf erkennen (oft ein Fehler, kann Endlosschleife verursachen)
             if (body instanceof SequenceNode s && s.stmts.isEmpty()) {
                 System.err.println("Warning: Empty while-body detected (may cause infinite loop) at " + whileTok);
             }
-            return new WhileNode(cond, body);
+            return new WhileNode(cond, body, whileTok.line, whileTok.col);
         }
         if (peek().type == TokenType.FOR) {
             Token forTok = next();
@@ -105,10 +105,10 @@ public class Parser {
             if (body instanceof SequenceNode s && s.stmts.isEmpty()) {
                 System.err.println("Warning: Empty for-body detected (may be unintended) at " + forTok);
             }
-            return new ForNode(init, cond, post, body);
+            return new ForNode(init, cond, post, body, forTok.line, forTok.col);
         }
         if (peek().type == TokenType.FUNCTION) {
-            next();
+            Token funcTok = next();
             if (peek().type != TokenType.IDENT) throw new ParseException("Expected function name", peek());
             Token name = next();
             eat(TokenType.LPAREN);
@@ -119,28 +119,28 @@ public class Parser {
                 while (peek().type == TokenType.COMMA) { next(); if (peek().type != TokenType.IDENT) throw new ParseException("Expected parameter name", peek()); params.add(next().text); }
             }
             eat(TokenType.RPAREN);
-            // body must be a block
+            // Rumpf muss ein Block sein
             Node body = parseStatement();
-            return new FunctionNode(name.text, params, body);
+            return new FunctionNode(name.text, params, body, funcTok.line, funcTok.col);
         }
 
         if (peek().type == TokenType.RETURN) {
-            next();
+            Token retTok = next();
             Node expr = null;
             if (peek().type != TokenType.SEMI && peek().type != TokenType.RBRACE && peek().type != TokenType.EOF) {
                 expr = parseComparison();
             }
-            return new ReturnNode(expr);
+            return new ReturnNode(expr, retTok.line, retTok.col);
         }
 
         if (peek().type == TokenType.IDENT) {
-            // Assignment: IDENT '=' expr
+            // Zuweisung: IDENT '=' expr
             Token second = (pos + 1) < tokens.size() ? tokens.get(pos + 1) : new Token(TokenType.EOF, "", pos + 1);
             if (second.type == TokenType.ASSIGN) {
                 Token ident = next();
-                next(); // consume ASSIGN
+                next(); // ASSIGN konsumieren
                 Node e = parseComparison();
-                return new AssignNode(ident.text, e);
+                return new AssignNode(ident.text, e, ident.line, ident.col);
             }
         }
         return parseComparison();
@@ -209,11 +209,11 @@ public class Parser {
         }
         if (peek().type == TokenType.NUMBER) {
             Token t = next();
-            return new NumberNode(Double.parseDouble(t.text));
+            return new NumberNode(Double.parseDouble(t.text), t.line, t.col);
         }
         if (peek().type == TokenType.IDENT) {
             Token t = next();
-            // function call: IDENT '(' args ')'
+            // Funktionsaufruf: IDENT '(' Argumente ')'
             if (peek().type == TokenType.LPAREN) {
                 next();
                 List<Node> args = new ArrayList<>();
@@ -225,9 +225,9 @@ public class Parser {
                     }
                 }
                 eat(TokenType.RPAREN);
-                return new CallNode(t.text, args);
+                return new CallNode(t.text, args, t.line, t.col);
             }
-            return new VarNode(t.text);
+            return new VarNode(t.text, t.line, t.col);
         }
         if (peek().type == TokenType.LPAREN) {
             eat(TokenType.LPAREN);

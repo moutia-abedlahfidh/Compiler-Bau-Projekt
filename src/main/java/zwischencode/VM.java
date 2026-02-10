@@ -49,7 +49,7 @@ public class VM {
         callStack.clear();
         functions.clear();
 
-        // Top-Level Environment
+        // Umgebung der obersten Ebene
         locals = new HashMap<>(initialEnv);
 
         // 1) Funktionen indexieren
@@ -126,7 +126,7 @@ public class VM {
                     String fname = parseCallName(callSig);
                     int argc = parseCallArity(callSig);
 
-                    // passende Function-Def anhand Name suchen
+                    // passende Funktionsdefinition anhand des Namens suchen
                     FuncInfo fi = lookupByNameAndArity(fname, argc);
                     if (fi == null) throw new RuntimeException("Undefined function: " + fname + " with " + argc + " args");
 
@@ -151,7 +151,7 @@ public class VM {
                 }
 
                 case RET -> {
-                    // Return value ist entweder StackTop oder 0.0 (wenn return; ohne expr)
+                    // Rueckgabewert ist entweder Stack-Top oder 0.0 (wenn return; ohne expr)
                     double rv = stack.isEmpty() ? 0.0 : pop();
                     ip = doReturn(rv);
                 }
@@ -179,7 +179,7 @@ public class VM {
 
     private int doReturn(double rv) {
         if (callStack.isEmpty()) {
-            // return im Top-Level: Programmende
+            // return auf oberster Ebene: Programmende
             stack.push(rv);
             return Integer.MAX_VALUE;
         }

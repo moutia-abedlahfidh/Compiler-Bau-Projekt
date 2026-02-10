@@ -1,7 +1,7 @@
 package ast;
 
 /**
- * Internal exception used to implement `return` semantics while evaluating AST.
+ * Interne Exception zur Umsetzung der `return`-Semantik bei der AST-Auswertung.
  */
 public class ReturnException extends RuntimeException {
     public final double value;

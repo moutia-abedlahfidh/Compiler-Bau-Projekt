@@ -69,16 +69,16 @@ public class Tokenizer {
             if (Character.isDigit(c) || (c == '.' && (pos + 1) < input.length() && Character.isDigit(input.charAt(pos + 1)))) {
                 int start = pos;
                 StringBuilder sb = new StringBuilder();
-                // leading digits
+                // fuehrende Ziffern
                 if (Character.isDigit(peek())) {
                     while (Character.isDigit(peek())) sb.append(next());
                 }
-                // fractional part
+                // Nachkommanteil
                 if (peek() == '.') {
-                    sb.append(next()); // consume '.'
+                    sb.append(next()); // '.' konsumieren
                     while (Character.isDigit(peek())) sb.append(next());
                 }
-                // exponent part (optional)
+                // Exponententeil (optional)
                 if (peek() == 'e' || peek() == 'E') {
                     sb.append(next());
                     if (peek() == '+' || peek() == '-') sb.append(next());
@@ -89,25 +89,25 @@ public class Tokenizer {
                 tokens.add(new Token(TokenType.NUMBER, sb.toString(), start, line, col - (sb.length())));
                 continue;
             }
-            // comments: // line comment or /* block comment */
+            // Kommentare: // Zeilenkommentar oder /* Blockkommentar */
             if (peek() == '/') {
                 if ((pos + 1) < input.length() && input.charAt(pos + 1) == '/') {
-                    // consume '//' and skip to end of line
+                    // '//' konsumieren und bis Zeilenende ueberspringen
                     next(); next();
                     while (peek() != '\n' && peek() != '\0') next();
-                    // consume newline if present
+                    // Zeilenumbruch konsumieren, falls vorhanden
                         if (peek() == '\n') next();
                     continue;
                 }
                 if ((pos + 1) < input.length() && input.charAt(pos + 1) == '*') {
-                    // consume '/*' and skip until '*/'
+                    // '/*' konsumieren und bis '*/' ueberspringen
                     next(); next();
                     while (true) {
                         if (peek() == '\0') throw new RuntimeException("Unterminated block comment");
                 if (peek() == '*' && (pos + 1) < input.length() && input.charAt(pos + 1) == '/') {
                     int endLine = line;
                     int endCol = col;
-                    next(); next(); // consume '*/'
+                    next(); next(); // '*/' konsumieren
                             break;
                         }
                         next();
@@ -115,9 +115,9 @@ public class Tokenizer {
                     continue;
                 }
             }
-            // treat '#' as a line comment (common in test files)
+            // '#' als Zeilenkommentar behandeln (haeufig in Testdateien)
             if (peek() == '#') {
-                // consume '#' and skip to end of line
+                // '#' konsumieren und bis Zeilenende ueberspringen
                 next();
                 while (peek() != '\n' && peek() != '\0') next();
                 if (peek() == '\n') next();
@@ -125,7 +125,7 @@ public class Tokenizer {
             }
             char op = next();
             int opPos = pos - 1;
-            // handle two-char operators: ==, !=, <=, >=
+            // Zwei-Zeichen-Operatoren behandeln: ==, !=, <=, >=
                 if (op == '=') {
                     if (peek() == '=') { next(); tokens.add(new Token(TokenType.EQ, "==", opPos, line, col - 1)); }
                     else { tokens.add(new Token(TokenType.ASSIGN, "=", opPos, line, col - 1)); }

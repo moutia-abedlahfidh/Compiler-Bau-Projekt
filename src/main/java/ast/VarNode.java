@@ -8,7 +8,10 @@ import java.util.Map;
  */
 public class VarNode extends Node {
     public final String name;
-    public VarNode(String name) { this.name = name; }
+    public VarNode(String name, int line, int col) {
+        super(line, col);
+        this.name = name;
+    }
     @Override
     public double eval(Map<String, Double> env) {
         Double v = env.get(name);

@@ -12,7 +12,8 @@ public class ForNode extends Node {
     public final Node post;
     public final Node body;
 
-    public ForNode(Node init, Node cond, Node post, Node body) {
+    public ForNode(Node init, Node cond, Node post, Node body, int line, int col) {
+        super(line, col);
         this.init = init; this.cond = cond; this.post = post; this.body = body;
     }
 
@@ -20,7 +21,7 @@ public class ForNode extends Node {
     public double eval(Map<String, Double> env) {
         double last = 0;
         if (init != null) init.eval(env);
-        // if body is empty, warn and skip executing the loop to avoid accidental infinite loops
+        // bei leerem Rumpf warnen und Schleife ueberspringen, um Endlosschleifen zu vermeiden
         if (body instanceof SequenceNode s && s.stmts.isEmpty()) {
             System.err.println("Runtime warning: empty for-body detected — skipping loop to avoid infinite loop");
             return last;

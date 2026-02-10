@@ -13,7 +13,12 @@ public class BinOpNode extends Node {
     public final Node left;
     public final Token op;
     public final Node right;
-    public BinOpNode(Node left, Token op, Node right) { this.left = left; this.op = op; this.right = right; }
+    public BinOpNode(Node left, Token op, Node right) {
+        super(op.line, op.col);
+        this.left = left;
+        this.op = op;
+        this.right = right;
+    }
     @Override
     public double eval(Map<String, Double> env) {
         double l = left.eval(env);
@@ -26,7 +31,7 @@ public class BinOpNode extends Node {
             if (r == 0.0) throw new ArithmeticException("Division by zero");
             return l / r;
         }
-        // comparisons: return 1.0 for true, 0.0 for false
+        // Vergleiche: 1.0 fuer true, 0.0 fuer false
         if (t == TokenType.LT) return l < r ? 1.0 : 0.0;
         if (t == TokenType.GT) return l > r ? 1.0 : 0.0;
         if (t == TokenType.LE) return l <= r ? 1.0 : 0.0;

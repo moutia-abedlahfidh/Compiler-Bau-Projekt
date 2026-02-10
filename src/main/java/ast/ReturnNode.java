@@ -4,7 +4,10 @@ import java.util.Map;
 
 public class ReturnNode extends Node {
     public final Node expr;
-    public ReturnNode(Node expr) { this.expr = expr; }
+    public ReturnNode(Node expr, int line, int col) {
+        super(line, col);
+        this.expr = expr;
+    }
 
     @Override
     public double eval(Map<String, Double> env) {
